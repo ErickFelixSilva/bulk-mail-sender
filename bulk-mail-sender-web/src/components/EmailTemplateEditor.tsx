@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { EmailTemplate, getEmailTemplate, saveEmailTemplate } from '../services/EmailTemplateService';
 import axios, { CancelToken } from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 function EmailTemplateEditor(): JSX.Element {
   const [template, setTemplate] = useState<EmailTemplate>({ subject: '', body: '' });
   const [loading, setLoading] = useState<boolean>(true);
+  const navigate = useNavigate();
 
   const fetchTemplate = async (cancelToken: CancelToken) => {
     try {
-      console.log("FETCHING TEMPLATE");
       const lastTemplate = await getEmailTemplate({ cancelToken });
       setTemplate(lastTemplate);
     } catch (error) {
@@ -81,7 +82,7 @@ function EmailTemplateEditor(): JSX.Element {
           />
         </div>
         <div className='flex justify-end gap-4'>
-          <button className="text-blue-600 border-blue-600 border-2 px-4 py-2 rounded-lg hover:bg-blue-100">Bulk send email</button>
+          <button className="text-blue-600 border-blue-600 border-2 px-4 py-2 rounded-lg hover:bg-blue-100" onClick={() => navigate('/nonprofits')}>Bulk send email</button>
           <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700" onClick={handleSaveClick}>Save</button>
         </div>
       </div>

@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import './App.css';
 import Home from './components/Home';
 import EmailTemplateEditor from './components/EmailTemplateEditor';
+import NonprofitList from './components/NonprofitList';
 
 function App(): JSX.Element {
   return (
@@ -21,7 +22,7 @@ function App(): JSX.Element {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/email-template" element={<EmailTemplateEditor />} />
-            {/* <Route path="/emails/send" element={<SendBulkEmails />} /> */}
+            <Route path="/nonprofits" element={<NonprofitList />} />
           </Routes>
         </div>
       </div>
