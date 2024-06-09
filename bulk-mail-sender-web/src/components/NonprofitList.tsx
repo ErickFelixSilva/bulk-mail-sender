@@ -59,6 +59,10 @@ function NonprofitList(): JSX.Element {
 		setEditingNonprofit(nonprofit);
 	};
 
+	const handleSendEmail = async () => {
+		
+	}
+
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
 		if (editingNonprofit) {

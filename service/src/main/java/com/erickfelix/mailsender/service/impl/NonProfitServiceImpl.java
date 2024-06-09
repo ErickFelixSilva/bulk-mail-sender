@@ -23,6 +23,11 @@ public class NonProfitServiceImpl implements NonProfitService {
     }
 
     @Override
+    public List<NonProfit> getAllNonProfitsByIds(List<Long> ids) {
+        return nonProfitRepository.findAllById(ids);
+    }
+
+    @Override
     public NonProfit getNonProfitById(Long id) {
         return nonProfitRepository.findById(id).orElseThrow(() -> new NonProfitNotFoundException("Nonprofit not found"));
     }
