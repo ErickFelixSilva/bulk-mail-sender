@@ -1,36 +1,54 @@
 import React, { useEffect, useState } from 'react';
 import { EmailTemplate, getEmailTemplate, saveEmailTemplate } from '../services/EmailTemplateService';
+import axios, { CancelToken } from 'axios';
 
 function EmailTemplateEditor(): JSX.Element {
-  const [subject, setSubject] = useState<string>('');
-  const [body, setBody] = useState<string>('');
+  const [template, setTemplate] = useState<EmailTemplate>({ subject: '', body: '' });
   const [loading, setLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    const fetchTemplate = async () => {
-      try {
-        const template = await getEmailTemplate();
-        setSubject(template.subject);
-        setBody(template.body);
-      } catch (error) {
+  const fetchTemplate = async (cancelToken: CancelToken) => {
+    try {
+      console.log("FETCHING TEMPLATE");
+      const lastTemplate = await getEmailTemplate({ cancelToken });
+      setTemplate(lastTemplate);
+    } catch (error) {
+      if (axios.isCancel(error)) {
+        console.log('Request cancelled');
+      } else {
         console.error('Failed to fetch email template', error);
-      } finally {
-        setLoading(false);
       }
-    };
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchTemplate();
+  useEffect(() => {
+    const source = axios.CancelToken.source();
+
+    fetchTemplate(source.token);
+
+    return () => {
+      source.cancel();
+    };
   }, []);
 
   const handleSaveClick = async () => {
     try {
-      const template: EmailTemplate = { subject, body };
-      await saveEmailTemplate(template);
+      const savedTemplate = await saveEmailTemplate(template);
+      setTemplate(savedTemplate);
       alert('Template saved successfully!');
     } catch (error) {
       console.error('Failed to save email template', error);
       alert('Failed to save template');
     }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setTemplate((prevTemplate) => ({
+      ...prevTemplate,
+      [name]: value,
+    }));
   };
 
   if (loading) {
@@ -46,18 +64,20 @@ function EmailTemplateEditor(): JSX.Element {
           <input
             id="subject"
             type="text"
+            name="subject"
             className="w-full p-2 border border-gray-300 rounded-lg mb-4"
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
+            value={template.subject}
+            onChange={handleChange}
           />
         </div>
         <div className="flex flex-col items-start">
           <label htmlFor="body" className="text-lg text-gray-700 mb-2">Body</label>
           <textarea
             id="body"
+            name="body"
             className="w-full min-h-40 p-2 border border-gray-300 rounded-lg mb-4"
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
+            value={template.body}
+            onChange={handleChange}
           />
         </div>
         <div className='flex justify-end gap-4'>
