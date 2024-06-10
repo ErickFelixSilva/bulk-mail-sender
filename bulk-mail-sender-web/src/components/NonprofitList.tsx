@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCheckCircle, faTimesCircle } from '@fortawesome/free-solid-svg-icons'
+import React, { useState, useEffect, useCallback } from 'react';
 import { getNonprofits, saveNonprofit, updateNonprofit, deleteNonprofit, Nonprofit } from '../services/NonprofitService';
 import { sendEmails } from '../services/EmailService';
 import axios, { CancelToken, isCancel } from 'axios';
 import { handleAxiosError } from '../utils/errorHandler';
+import NonprofitItem from './NonprofitItem';
 
 function NonprofitList(): JSX.Element {
 	const [nonprofits, setNonprofits] = useState<Nonprofit[]>([]);
@@ -49,7 +48,7 @@ function NonprofitList(): JSX.Element {
 		}
 	};
 
-	const handleDeleteNonprofit = async (id: number) => {
+	const handleDeleteNonprofit = useCallback( async (id: number) => {
 		const confirmDelete = window.confirm('Are you sure you want to delete this nonprofit?');
 		if (!confirmDelete) {
 			return;
@@ -61,17 +60,17 @@ function NonprofitList(): JSX.Element {
 		} catch (error: any) {
 			handleAxiosError('Failed to delete nonprofit', error);
 		}
-	};
+	}, []);
 
-	const handleSelectNonprofit = (id: number) => {
+	const handleSelectNonprofit = useCallback((id: number) => {
 		setSelectedNonprofits((prevSelected) =>
 			prevSelected.includes(id) ? prevSelected.filter((nid) => nid !== id) : [...prevSelected, id]
 		);
-	};
+	}, []);
 
-	const handleEditNonprofit = (nonprofit: Nonprofit) => {
+	const handleEditNonprofit = useCallback((nonprofit: Nonprofit) => {
 		setEditingNonprofit(nonprofit);
-	};
+	}, []);
 
 	const handleSendEmail = async () => {
 		try {
@@ -150,39 +149,11 @@ function NonprofitList(): JSX.Element {
 				</thead>
 				<tbody>
 					{nonprofits.map((nonprofit) => (
-						<tr key={nonprofit.id} className={`border-t ${nonprofit.emailSent ? 'bg-green-100' : ''}`}>
-							<td className="py-2 px-4">
-								<input
-									type="checkbox"
-									checked={selectedNonprofits.includes(nonprofit.id!)}
-									onChange={() => handleSelectNonprofit(nonprofit.id!)}
-								/>
-							</td>
-							<td className="py-2 px-4">{nonprofit.name}</td>
-							<td className="py-2 px-4">{nonprofit.email}</td>
-							<td className="py-2 px-4">{nonprofit.address}</td>
-							<td className="py-2 px-4">
-							{nonprofit.emailSent ? (
-                <FontAwesomeIcon icon={faCheckCircle} className="text-green-500" />
-              ) : (
-                <FontAwesomeIcon icon={faTimesCircle} className="text-gray-500" />
-              )}
-							</td>
-							<td className="py-2 px-4">
-								<button
-									className="bg-yellow-600 text-white px-2 py-1 rounded-lg hover:bg-yellow-700"
-									onClick={() => handleEditNonprofit(nonprofit)}
-								>
-									Edit
-								</button>
-								<button
-									className="bg-red-600 text-white px-2 py-1 rounded-lg hover:bg-red-700 ml-2"
-									onClick={() => handleDeleteNonprofit(nonprofit.id!)}
-								>
-									Delete
-								</button>
-							</td>
-						</tr>
+						<NonprofitItem key={nonprofit.id} nonprofit={nonprofit}
+							selectedNonprofits={selectedNonprofits}
+							handleSelectNonprofit={handleSelectNonprofit}
+							handleEditNonprofit={handleEditNonprofit}
+							handleDeleteNonprofit={handleDeleteNonprofit} />
 					))}
 				</tbody>
 			</table>
