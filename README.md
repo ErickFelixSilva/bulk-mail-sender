@@ -51,9 +51,14 @@ all the technologies involved, which are listed below. The application allows us
 - Node.js (v20.14.0)
 - npm or yarn
 - Java 22
-- Maven
 
 ### Installation
+
+The applications setup is very simple, they are just basic Spring Boot and React applications. The most important is
+to use compatible node and java versions which are Java 22 for the backend and Node.js 20.14.0 for the frontend.
+The backend uses Maven as a build tool, but it is possible to use the maven wrapper to build and run the application.
+
+The following steps will guide you through the installation process:
 
 1. **Clone the repository**
 
@@ -69,18 +74,23 @@ all the technologies involved, which are listed below. The application allows us
    cd backend
    ```
 
- - Build the project:
+ - Build the project with local maven:
    
    ```sh
    mvn clean install
    ```
+ - For maven commands, if there is no local maven installed, it is possible to use the maven wrapper this way:
 
- - Start the backend server:
+      ```sh
+      mvnw.cmd clean install
+      ```
+  
+ - Start the backend server with local maven:
    
    ```sh
    mvn spring-boot:run
    ```
-   or to use the maven wrapper:
+ - Start the backend server with maven wrapper:
    
    ```sh
    mvnw.cmd spring-boot:run
@@ -115,12 +125,13 @@ all the technologies involved, which are listed below. The application allows us
 
 1. **Open the application in your browser**:
    - Navigate to `http://localhost:3000`
+   - Use the navigation bar on the top to access the other functionalities.
+   
+2. **Create Email Templates**:
+    - Create and save email template, if necessary.
 
-2. **Manage Nonprofits**:
+3. **Manage Nonprofits**:
    - Add, edit, or delete nonprofits through the UI.
-
-3. **Create Email Templates**:
-   - Create and save email templates.
 
 4. **Send Bulk Emails**:
    - Select nonprofits and send bulk emails using the saved template.
@@ -130,12 +141,35 @@ all the technologies involved, which are listed below. The application allows us
 
 ## Testing
 
-### Backend Tests
-
 - To run the backend tests, use the following command:
 
   ```sh
   cd backend
   mvn test
   ```
+- Or again, to use the maven wrapper:
+    
+  ```sh
+  cd backend
+  mvnw.cmd test
+  ```
   
+## API Endpoints
+
+### Nonprofit Endpoints
+
+- GET /api/nonprofits: Get all nonprofits
+- GET /api/nonprofits/{id}: Get a nonprofit by ID
+- POST /api/nonprofits: Create a new nonprofit
+- PUT /api/nonprofits/{id}: Update a nonprofit 
+- DELETE /api/nonprofits/{id}: Delete a nonprofit
+
+### Email Template Endpoints
+
+- GET /api/email-template: Get the email template
+- POST /api/email-template: Save the email template
+
+### Email Sending Endpoints
+
+- POST /api/mails: Send emails to selected nonprofits using the current saved template 
+- GET /api/mails/logs: Get logs of sent emails
