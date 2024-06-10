@@ -28,10 +28,14 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendEmailWithTemplate(EmailTemplate emailTemplate, Nonprofit nonProfit) {
         String recipient = nonProfit.getEmail();
-        String body = emailTemplate.getBody()
-                .replace("{name}", nonProfit.getName())
-                .replace("{address}", nonProfit.getAddress());
+        String body = emailTemplate.getBody();
 
+        if (nonProfit.getName() != null) {
+            body = body.replace("{name}", nonProfit.getName());
+        }
+        if (nonProfit.getAddress() != null) {
+            body = body.replace("{address}", nonProfit.getAddress());
+        }
         sendEmail(nonProfit.getId(), recipient, emailTemplate.getSubject(), body);
     }
 
