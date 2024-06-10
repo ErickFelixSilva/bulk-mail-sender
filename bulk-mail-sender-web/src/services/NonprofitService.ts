@@ -5,6 +5,7 @@ export type Nonprofit = {
   name: string;
   email: string;
   address: string;
+  recentlySent: boolean;
 }
 
 const API_URL = 'http://localhost:8080/api/nonprofits';

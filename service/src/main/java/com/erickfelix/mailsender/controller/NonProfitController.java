@@ -1,7 +1,10 @@
 package com.erickfelix.mailsender.controller;
 
-import com.erickfelix.mailsender.model.NonProfit;
-import com.erickfelix.mailsender.service.NonProfitService;
+import com.erickfelix.mailsender.dto.NonprofitDto;
+import com.erickfelix.mailsender.dto.NonprofitMapper;
+import com.erickfelix.mailsender.model.Nonprofit;
+import com.erickfelix.mailsender.service.EmailService;
+import com.erickfelix.mailsender.service.NonprofitService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,41 +22,50 @@ import java.util.List;
 @RequestMapping("/api/nonprofits")
 public class NonProfitController {
 
-    private final NonProfitService nonProfitService;
+    private final NonprofitService nonProfitService;
+    private final EmailService emailService;
 
-    public NonProfitController(NonProfitService nonProfitService) {
+    public NonProfitController(NonprofitService nonProfitService,
+                               EmailService emailService) {
         this.nonProfitService = nonProfitService;
+        this.emailService = emailService;
     }
 
      @GetMapping
-     public List<NonProfit> getAllNonProfits() {
-         return nonProfitService.getAllNonProfits();
+     public List<NonprofitDto> getAllNonProfits() {
+         var nonprofits = nonProfitService.getAllNonprofits();
+         return nonprofits.stream()
+                 .map(nonprofit -> {
+                    var recentlySent = emailService.isRecentlySent(nonprofit.getId());
+                    return NonprofitMapper.toDto(nonprofit, recentlySent);
+                 }).toList();
      }
 
      @GetMapping("/{id}")
-     public NonProfit getNonProfitById(@PathVariable Long id) {
-         return nonProfitService.getNonProfitById(id);
+     public NonprofitDto getNonProfitById(@PathVariable Long id) {
+         var nonprofit = nonProfitService.getNonprofitById(id);
+         return NonprofitMapper.toDto(nonprofit, emailService.isRecentlySent(id));
      }
 
      @PostMapping
-     public NonProfit createNonProfit(@RequestBody NonProfit nonProfit) {
-         return nonProfitService.createNonProfit(nonProfit);
+     public Nonprofit createNonProfit(@RequestBody Nonprofit nonProfit) {
+         return nonProfitService.createNonprofit(nonProfit);
      }
 
      @PutMapping("/{id}")
-     public ResponseEntity<NonProfit> updateNonProfit(@PathVariable Long id, @RequestBody NonProfit nonProfit) {
-         boolean nonProfitExists = nonProfitService.nonProfitExists(id);
-         NonProfit updatedNonProfit = nonProfitService.updateNonProfit(id, nonProfit);
+     public ResponseEntity<Nonprofit> updateNonProfit(@PathVariable Long id, @RequestBody Nonprofit nonProfit) {
+         boolean nonProfitExists = nonProfitService.nonprofitExists(id);
+         Nonprofit updatedNonprofit = nonProfitService.updateNonprofit(id, nonProfit);
 
          if (nonProfitExists) {
-             return ResponseEntity.ok(updatedNonProfit);
+             return ResponseEntity.ok(updatedNonprofit);
          } else {
-             return new ResponseEntity<>(updatedNonProfit, HttpStatus.CREATED);
+             return new ResponseEntity<>(updatedNonprofit, HttpStatus.CREATED);
          }
      }
 
      @DeleteMapping("/{id}")
      public void deleteNonProfit(@PathVariable Long id) {
-         nonProfitService.deleteNonProfit(id);
+         nonProfitService.deleteNonprofit(id);
      }
 }

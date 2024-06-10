@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { getSentEmailLogs } from '../services/EmailService';
 
 interface EmailLog {
   recipient: string;
@@ -13,8 +13,8 @@ const EmailLogs: React.FC = () => {
   useEffect(() => {
     const fetchLogs = async () => {
       try {
-        const response = await axios.get<EmailLog[]>('/api/emails/logs');
-        setLogs(response.data);
+        const response = await getSentEmailLogs();
+        setLogs(response);
       } catch (error) {
         console.error('Failed to fetch email logs', error);
       }
@@ -25,7 +25,7 @@ const EmailLogs: React.FC = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-4">Sent Emails</h1>
+      <h1 className="text-blue-600 text-3xl font-bold mb-4">Recently Sent Emails</h1>
       <table className="min-w-full bg-white">
         <thead>
           <tr>

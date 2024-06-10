@@ -1,12 +1,3 @@
 package com.erickfelix.mailsender.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-
-@Data
-@AllArgsConstructor
-public class EmailLog {
-    private String recipient;
-    private String subject;
-    private String body;
-}
+public record EmailLog(Long id, String recipient, String subject, String body) {}

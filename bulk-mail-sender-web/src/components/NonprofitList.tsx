@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getNonprofits, saveNonprofit, updateNonprofit, deleteNonprofit, Nonprofit } from '../services/NonprofitService';
+import { sendEmails } from '../services/EmailService';
 
 function NonprofitList(): JSX.Element {
 	const [nonprofits, setNonprofits] = useState<Nonprofit[]>([]);
@@ -18,12 +19,6 @@ function NonprofitList(): JSX.Element {
 		} catch (error) {
 			console.error('Failed to fetch nonprofits', error);
 		}
-	};
-
-	const handleSelectNonprofit = (id: number) => {
-		setSelectedNonprofits((prevSelected) =>
-			prevSelected.includes(id) ? prevSelected.filter((nid) => nid !== id) : [...prevSelected, id]
-		);
 	};
 
 	const handleSaveNonprofit = async () => {
@@ -51,16 +46,27 @@ function NonprofitList(): JSX.Element {
       await deleteNonprofit(id);
       fetchNonprofits();
     } catch (error) {
-      console.error('Failed to delete nonprofit', error);
+      alert('Failed to delete nonprofit: ' + error);
     }
   };
+
+	const handleSelectNonprofit = (id: number) => {
+		setSelectedNonprofits((prevSelected) =>
+			prevSelected.includes(id) ? prevSelected.filter((nid) => nid !== id) : [...prevSelected, id]
+		);
+	};
 
 	const handleEditNonprofit = (nonprofit: Nonprofit) => {
 		setEditingNonprofit(nonprofit);
 	};
 
 	const handleSendEmail = async () => {
-		
+		try {
+			await sendEmails(selectedNonprofits);
+		} catch (error: any) {
+			const message = error.response?.data || error.message;
+			alert('Failed to send email to selected nonprofits: ' + message);
+		}
 	}
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,7 +80,7 @@ function NonprofitList(): JSX.Element {
 
 	return (
 		<div className="container mx-auto p-4">
-			<h1 className="text-3xl font-bold mb-4">Nonprofits</h1>
+			<h1 className="text-blue-600 text-3xl font-bold mb-4">Nonprofits</h1>
 			<div className="mb-4">
 				<h2 className="text-xl font-bold mb-2">{editingNonprofit ? 'Edit Nonprofit' : 'Add New Nonprofit'}</h2>
 				<div className="flex space-x-4">
@@ -125,6 +131,7 @@ function NonprofitList(): JSX.Element {
 						<th className="py-2 px-4 text-left">Name</th>
 						<th className="py-2 px-4 text-left">Email</th>
 						<th className="py-2 px-4 text-left">Address</th>
+						<th className="py-2 px-4 text-left">Recently Sent</th>
 						<th className="py-2 px-4 text-left">Actions</th>
 					</tr>
 				</thead>
@@ -141,6 +148,7 @@ function NonprofitList(): JSX.Element {
 							<td className="py-2 px-4">{nonprofit.name}</td>
 							<td className="py-2 px-4">{nonprofit.email}</td>
 							<td className="py-2 px-4">{nonprofit.address}</td>
+							<td className="py-2 px-4">{nonprofit.recentlySent}</td>
 							<td className="py-2 px-4">
 								<button
 									className="bg-yellow-600 text-white px-2 py-1 rounded-lg hover:bg-yellow-700"
@@ -164,7 +172,7 @@ function NonprofitList(): JSX.Element {
 					className={`h-full px-4 py-2 rounded-lg ml-2 ${selectedNonprofits.length === 0 ? 
 						'bg-gray-600 text-white cursor-not-allowed' : 
 						'bg-blue-600 text-white hover:bg-blue-700'}`}
-					onClick={() => setEditingNonprofit(null)}>
+					onClick={handleSendEmail}>
 						{selectedNonprofits.length === 0 ? 'Select a nonprofit to send email' :
 						'Send email to selected nonprofits'}</button>
 			</div>

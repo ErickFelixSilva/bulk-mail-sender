@@ -8,7 +8,7 @@ import lombok.Data;
 
 @Entity
 @Data
-public class NonProfit {
+public class Nonprofit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { EmailTemplate, getEmailTemplate, saveEmailTemplate } from '../services/EmailTemplateService';
-import axios, { CancelToken } from 'axios';
+import axios,{ CancelToken, isCancel } from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 function EmailTemplateEditor(): JSX.Element {
@@ -13,7 +13,7 @@ function EmailTemplateEditor(): JSX.Element {
       const lastTemplate = await getEmailTemplate({ cancelToken });
       setTemplate(lastTemplate);
     } catch (error) {
-      if (axios.isCancel(error)) {
+      if (isCancel(error)) {
         console.log('Request cancelled');
       } else {
         console.error('Failed to fetch email template', error);

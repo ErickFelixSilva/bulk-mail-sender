@@ -2,7 +2,7 @@ package com.erickfelix.mailsender.service.impl;
 
 import com.erickfelix.mailsender.model.EmailLog;
 import com.erickfelix.mailsender.model.EmailTemplate;
-import com.erickfelix.mailsender.model.NonProfit;
+import com.erickfelix.mailsender.model.Nonprofit;
 import com.erickfelix.mailsender.service.EmailService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,30 +17,37 @@ public class EmailServiceImpl implements EmailService {
 
     private final List<EmailLog> emailLogs = new ArrayList<>();
 
-    private void sendEmail(String recipient, String subject, String body) {
+    private void sendEmail(Long nonprofitId, String recipient, String subject, String body) {
         logger.info("Email sent to: {}", recipient);
         logger.info("Subject: {}", subject);
         logger.info("Body: {}", body);
 
-        emailLogs.add(new EmailLog(recipient, subject, body));
+        emailLogs.add(new EmailLog(nonprofitId, recipient, subject, body));
     }
 
     @Override
-    public void sendEmailWithTemplate(EmailTemplate emailTemplate, NonProfit nonProfit) {
+    public void sendEmailWithTemplate(EmailTemplate emailTemplate, Nonprofit nonProfit) {
         String recipient = nonProfit.getEmail();
         String body = emailTemplate.getBody()
                 .replace("{name}", nonProfit.getName())
                 .replace("{address}", nonProfit.getAddress());
 
-        sendEmail(recipient, emailTemplate.getSubject(), body);
+        sendEmail(nonProfit.getId(), recipient, emailTemplate.getSubject(), body);
     }
 
     @Override
-    public void sendBulkEmailWithTemplate(EmailTemplate emailTemplate, List<NonProfit> nonProfits) {
-        nonProfits.forEach(nonProfit -> sendEmailWithTemplate(emailTemplate, nonProfit));
+    public void sendBulkEmailWithTemplate(EmailTemplate emailTemplate, List<Nonprofit> nonprofits) {
+        nonprofits.forEach(nonProfit -> sendEmailWithTemplate(emailTemplate, nonProfit));
     }
 
+    @Override
     public List<EmailLog> getEmailLogs() {
         return new ArrayList<>(emailLogs);
+    }
+
+    @Override
+    public boolean isRecentlySent(Long nonprofitId) {
+        return emailLogs.stream()
+                .anyMatch(log -> log.id().equals(nonprofitId));
     }
 }
