@@ -14,4 +14,5 @@ public interface NonprofitService {
     Nonprofit updateNonprofit(Long id, Nonprofit nonProfit);
     void deleteNonprofit(Long id);
     Boolean nonprofitExists(Long id);
+    void markAsSent(List<Long> ids);
 }

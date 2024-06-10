@@ -65,6 +65,11 @@ public class NonprofitServiceImpl implements NonprofitService {
         return nonprofitRepository.existsById(id);
     }
 
+    @Override
+    public void markAsSent(List<Long> ids) {
+        nonprofitRepository.markAsSent(ids);
+    }
+
     private Nonprofit saveNonprofit(Nonprofit nonprofit) {
         try {
             return nonprofitRepository.save(nonprofit);

@@ -5,9 +5,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.erickfelix.mailsender.model.EmailLog;
 import com.erickfelix.mailsender.model.EmailTemplate;
 import com.erickfelix.mailsender.model.Nonprofit;
+import com.erickfelix.mailsender.service.NonprofitService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
@@ -15,6 +17,9 @@ import java.util.Arrays;
 
 @ExtendWith(MockitoExtension.class)
 class EmailServiceImplTest {
+
+    @Mock
+    private NonprofitService nonprofitService;
 
     @InjectMocks
     private EmailServiceImpl emailService;
@@ -76,21 +81,5 @@ class EmailServiceImplTest {
         assertEquals("nonprofit2@example.com", log2.recipient());
         assertEquals("Bulk Email Subject", log2.subject());
         assertEquals("Hello, Nonprofit 2! Your address is Address 2.", log2.body());
-    }
-
-    @Test
-    void testIsRecentlySent() {
-        Nonprofit nonprofit = new Nonprofit();
-        nonprofit.setId(1L);
-        nonprofit.setEmail("test@example.com");
-
-        EmailTemplate emailTemplate = new EmailTemplate();
-        emailTemplate.setSubject("Test Subject");
-        emailTemplate.setBody("Test Body");
-
-        emailService.sendEmailWithTemplate(emailTemplate, nonprofit);
-
-        assertTrue(emailService.isRecentlySent(1L));
-        assertFalse(emailService.isRecentlySent(2L));
     }
 }

@@ -121,4 +121,15 @@ class NonprofitServiceImplTest {
         assertEquals("Email already exists: duplicate@example.com", exception.getMessage());
         verify(nonprofitRepository, times(1)).save(nonprofit);
     }
+
+    @Test
+    void testMarkAsSent() {
+        List<Long> ids = Arrays.asList(1L, 2L, 3L);
+
+        doNothing().when(nonprofitRepository).markAsSent(ids);
+
+        nonprofitService.markAsSent(ids);
+
+        verify(nonprofitRepository, times(1)).markAsSent(ids);
+    }
 }

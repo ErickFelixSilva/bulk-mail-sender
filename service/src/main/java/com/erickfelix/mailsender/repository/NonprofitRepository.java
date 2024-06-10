@@ -15,5 +15,5 @@ public interface NonprofitRepository extends JpaRepository<Nonprofit, Long> {
     @Transactional
     @Modifying
     @Query("UPDATE Nonprofit n SET n.emailSent = true WHERE n.id IN :ids")
-    void markAsRecentlySent(List<Long> ids);
+    void markAsSent(List<Long> ids);
 }

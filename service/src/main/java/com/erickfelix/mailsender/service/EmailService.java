@@ -10,6 +10,4 @@ public interface EmailService {
     void sendEmailWithTemplate(EmailTemplate emailTemplate, Nonprofit nonProfit);
     void sendBulkEmailWithTemplate(EmailTemplate emailTemplate, List<Nonprofit> nonprofits);
     List<EmailLog> getEmailLogs();
-
-    boolean isRecentlySent(Long nonprofitId);
 }
