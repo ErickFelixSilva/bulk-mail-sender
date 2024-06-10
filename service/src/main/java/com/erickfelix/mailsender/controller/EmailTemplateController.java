@@ -2,6 +2,7 @@ package com.erickfelix.mailsender.controller;
 
 import com.erickfelix.mailsender.model.EmailTemplate;
 import com.erickfelix.mailsender.service.EmailTemplateService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,7 +28,7 @@ public class EmailTemplateController {
     }
 
      @PostMapping
-     public EmailTemplate saveEmailTemplate(@RequestBody EmailTemplate emailTemplate) {
+     public EmailTemplate saveEmailTemplate(@Valid @RequestBody EmailTemplate emailTemplate) {
          return emailTemplateService.saveEmailTemplate(emailTemplate);
      }
 }

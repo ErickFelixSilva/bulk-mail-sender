@@ -1,9 +1,11 @@
 package com.erickfelix.mailsender.service.impl;
 
+import com.erickfelix.mailsender.infra.EmailAlreadyExistsException;
 import com.erickfelix.mailsender.infra.NonProfitNotFoundException;
 import com.erickfelix.mailsender.model.Nonprofit;
 import com.erickfelix.mailsender.repository.NonprofitRepository;
 import com.erickfelix.mailsender.service.NonprofitService;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -33,8 +35,8 @@ public class NonprofitServiceImpl implements NonprofitService {
     }
 
     @Override
-    public Nonprofit createNonprofit(Nonprofit nonProfit) {
-        return nonprofitRepository.save(nonProfit);
+    public Nonprofit createNonprofit(Nonprofit nonprofit) {
+        return saveNonprofit(nonprofit);
     }
 
     @Override
@@ -43,10 +45,10 @@ public class NonprofitServiceImpl implements NonprofitService {
             existingNonprofit.setName(nonprofit.getName());
             existingNonprofit.setEmail(nonprofit.getEmail());
             existingNonprofit.setAddress(nonprofit.getAddress());
-            return nonprofitRepository.save(existingNonprofit);
+            return saveNonprofit(nonprofit);
         }).orElseGet(() -> {
             nonprofit.setId(id);
-            return nonprofitRepository.save(nonprofit);
+            return saveNonprofit(nonprofit);
         });
     }
 
@@ -61,5 +63,13 @@ public class NonprofitServiceImpl implements NonprofitService {
     @Override
     public Boolean nonprofitExists(Long id) {
         return nonprofitRepository.existsById(id);
+    }
+
+    private Nonprofit saveNonprofit(Nonprofit nonprofit) {
+        try {
+            return nonprofitRepository.save(nonprofit);
+        } catch (DataIntegrityViolationException ex) {
+            throw new EmailAlreadyExistsException("Email already exists: " + nonprofit.getEmail());
+        }
     }
 }

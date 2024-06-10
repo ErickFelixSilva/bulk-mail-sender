@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { EmailTemplate, getEmailTemplate, saveEmailTemplate } from '../services/EmailTemplateService';
 import axios,{ CancelToken, isCancel } from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { handleAxiosError } from '../utils/errorHandler';
 
 function EmailTemplateEditor(): JSX.Element {
   const [template, setTemplate] = useState<EmailTemplate>({ subject: '', body: '' });
@@ -16,7 +17,7 @@ function EmailTemplateEditor(): JSX.Element {
       if (isCancel(error)) {
         console.log('Request cancelled');
       } else {
-        console.error('Failed to fetch email template', error);
+        handleAxiosError('Failed to fetch template', error);
       }
     } finally {
       setLoading(false);
@@ -38,9 +39,8 @@ function EmailTemplateEditor(): JSX.Element {
       const savedTemplate = await saveEmailTemplate(template);
       setTemplate(savedTemplate);
       alert('Template saved successfully!');
-    } catch (error) {
-      console.error('Failed to save email template', error);
-      alert('Failed to save template');
+    } catch (error: any) {
+      handleAxiosError('Failed to save template', error);
     }
   };
 

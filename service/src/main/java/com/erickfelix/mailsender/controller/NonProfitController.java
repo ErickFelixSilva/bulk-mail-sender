@@ -5,6 +5,7 @@ import com.erickfelix.mailsender.dto.NonprofitMapper;
 import com.erickfelix.mailsender.model.Nonprofit;
 import com.erickfelix.mailsender.service.EmailService;
 import com.erickfelix.mailsender.service.NonprofitService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -48,12 +49,12 @@ public class NonProfitController {
      }
 
      @PostMapping
-     public Nonprofit createNonProfit(@RequestBody Nonprofit nonProfit) {
+     public Nonprofit createNonProfit(@Valid @RequestBody Nonprofit nonProfit) {
          return nonProfitService.createNonprofit(nonProfit);
      }
 
      @PutMapping("/{id}")
-     public ResponseEntity<Nonprofit> updateNonProfit(@PathVariable Long id, @RequestBody Nonprofit nonProfit) {
+     public ResponseEntity<Nonprofit> updateNonProfit(@PathVariable Long id,@Valid @RequestBody Nonprofit nonProfit) {
          boolean nonProfitExists = nonProfitService.nonprofitExists(id);
          Nonprofit updatedNonprofit = nonProfitService.updateNonprofit(id, nonProfit);
 

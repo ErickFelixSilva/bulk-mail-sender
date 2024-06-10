@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 
 export type Nonprofit = {
   id?: number;
@@ -10,22 +10,22 @@ export type Nonprofit = {
 
 const API_URL = 'http://localhost:8080/api/nonprofits';
 
-const getNonprofits = async (): Promise<Nonprofit[]> => {
-  const response = await axios.get<Nonprofit[]>(API_URL);
+const getNonprofits = async (config?: AxiosRequestConfig): Promise<Nonprofit[]> => {
+  const response = await axios.get<Nonprofit[]>(API_URL, config);
   return response.data;
 };
 
-const saveNonprofit = async (nonprofit: Nonprofit): Promise<Nonprofit> => {
-  const response = await axios.post<Nonprofit>(API_URL, nonprofit);
+const saveNonprofit = async (nonprofit: Nonprofit, config?: AxiosRequestConfig): Promise<Nonprofit> => {
+  const response = await axios.post<Nonprofit>(API_URL, nonprofit, config);
   return response.data;
 };
 
-const updateNonprofit = async (nonprofit: Nonprofit): Promise<Nonprofit> => {
-  const response = await axios.put<Nonprofit>(`${API_URL}/${nonprofit.id}`, nonprofit);
+const updateNonprofit = async (nonprofit: Nonprofit, config?: AxiosRequestConfig): Promise<Nonprofit> => {
+  const response = await axios.put<Nonprofit>(`${API_URL}/${nonprofit.id}`, nonprofit, config);
   return response.data;
 };
-const deleteNonprofit = async (id: number): Promise<void> => {
-  await axios.delete(`${API_URL}/${id}`);
+const deleteNonprofit = async (id: number, config?: AxiosRequestConfig): Promise<void> => {
+  await axios.delete(`${API_URL}/${id}`, config);
 };
 
 export { getNonprofits, saveNonprofit, updateNonprofit, deleteNonprofit };

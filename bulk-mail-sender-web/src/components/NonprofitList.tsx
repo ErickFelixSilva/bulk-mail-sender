@@ -1,23 +1,36 @@
 import React, { useState, useEffect } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCheckCircle, faTimesCircle } from '@fortawesome/free-solid-svg-icons'
 import { getNonprofits, saveNonprofit, updateNonprofit, deleteNonprofit, Nonprofit } from '../services/NonprofitService';
 import { sendEmails } from '../services/EmailService';
+import axios, { CancelToken, isCancel } from 'axios';
+import { handleAxiosError } from '../utils/errorHandler';
 
 function NonprofitList(): JSX.Element {
 	const [nonprofits, setNonprofits] = useState<Nonprofit[]>([]);
 	const [selectedNonprofits, setSelectedNonprofits] = useState<number[]>([]);
 	const [editingNonprofit, setEditingNonprofit] = useState<Nonprofit | null>(null);
-	const [newNonprofit, setNewNonprofit] = useState<Nonprofit>({ name: '', email: '', address: '' });
+	const [newNonprofit, setNewNonprofit] = useState<Nonprofit>({ name: '', email: '', address: '', recentlySent: false });
 
 	useEffect(() => {
-		fetchNonprofits();
+		const source = axios.CancelToken.source();
+		fetchNonprofits(source.token);
+
+    return () => {
+      source.cancel();
+    };
 	}, []);
 
-	const fetchNonprofits = async () => {
+	const fetchNonprofits = async (cancelToken?: CancelToken) => {
 		try {
-			const data = await getNonprofits();
+			const data = await getNonprofits({ cancelToken });
 			setNonprofits(data);
-		} catch (error) {
-			console.error('Failed to fetch nonprofits', error);
+		} catch (error: any) {
+			if (isCancel(error)) {
+        console.log('Request cancelled');
+			} else {
+				handleAxiosError('Failed to fetch nonprofits', error);
+			}
 		}
 	};
 
@@ -28,27 +41,27 @@ function NonprofitList(): JSX.Element {
 				setEditingNonprofit(null);
 			} else {
 				await saveNonprofit(newNonprofit);
-				setNewNonprofit({ name: '', email: '', address: '' });
+				setNewNonprofit({ name: '', email: '', address: '', recentlySent: false });
 			}
 			fetchNonprofits();
-		} catch (error) {
-			console.error('Failed to save nonprofit', error);
+		} catch (error: any) {
+			handleAxiosError('Failed to save nonprofit', error);
 		}
 	};
 
-  const handleDeleteNonprofit = async (id: number) => {
-    const confirmDelete = window.confirm('Are you sure you want to delete this nonprofit?');
-    if (!confirmDelete) {
-      return;
-    }
+	const handleDeleteNonprofit = async (id: number) => {
+		const confirmDelete = window.confirm('Are you sure you want to delete this nonprofit?');
+		if (!confirmDelete) {
+			return;
+		}
 
-    try {
-      await deleteNonprofit(id);
-      fetchNonprofits();
-    } catch (error) {
-      alert('Failed to delete nonprofit: ' + error);
-    }
-  };
+		try {
+			await deleteNonprofit(id);
+			fetchNonprofits();
+		} catch (error: any) {
+			handleAxiosError('Failed to delete nonprofit', error);
+		}
+	};
 
 	const handleSelectNonprofit = (id: number) => {
 		setSelectedNonprofits((prevSelected) =>
@@ -63,9 +76,9 @@ function NonprofitList(): JSX.Element {
 	const handleSendEmail = async () => {
 		try {
 			await sendEmails(selectedNonprofits);
+			await fetchNonprofits();
 		} catch (error: any) {
-			const message = error.response?.data || error.message;
-			alert('Failed to send email to selected nonprofits: ' + message);
+			handleAxiosError('Failed to send email to selected nonprofits', error);
 		}
 	}
 
@@ -137,7 +150,7 @@ function NonprofitList(): JSX.Element {
 				</thead>
 				<tbody>
 					{nonprofits.map((nonprofit) => (
-						<tr key={nonprofit.id} className="border-t">
+						<tr key={nonprofit.id} className={`border-t ${nonprofit.recentlySent ? 'bg-green-100' : ''}`}>
 							<td className="py-2 px-4">
 								<input
 									type="checkbox"
@@ -148,7 +161,13 @@ function NonprofitList(): JSX.Element {
 							<td className="py-2 px-4">{nonprofit.name}</td>
 							<td className="py-2 px-4">{nonprofit.email}</td>
 							<td className="py-2 px-4">{nonprofit.address}</td>
-							<td className="py-2 px-4">{nonprofit.recentlySent}</td>
+							<td className="py-2 px-4">
+							{nonprofit.recentlySent ? (
+                <FontAwesomeIcon icon={faCheckCircle} className="text-green-500" />
+              ) : (
+                <FontAwesomeIcon icon={faTimesCircle} className="text-gray-500" />
+              )}
+							</td>
 							<td className="py-2 px-4">
 								<button
 									className="bg-yellow-600 text-white px-2 py-1 rounded-lg hover:bg-yellow-700"
@@ -167,15 +186,17 @@ function NonprofitList(): JSX.Element {
 					))}
 				</tbody>
 			</table>
-			<div className="flex justify-end mt-4">
-				<button disabled={selectedNonprofits.length === 0}
-					className={`h-full px-4 py-2 rounded-lg ml-2 ${selectedNonprofits.length === 0 ? 
-						'bg-gray-600 text-white cursor-not-allowed' : 
-						'bg-blue-600 text-white hover:bg-blue-700'}`}
-					onClick={handleSendEmail}>
+			{nonprofits.length > 0 && (
+				<div className="flex justify-end mt-4">
+					<button disabled={selectedNonprofits.length === 0}
+						className={`h-full px-4 py-2 rounded-lg ml-2 ${selectedNonprofits.length === 0 ?
+							'bg-gray-600 text-white cursor-not-allowed' :
+							'bg-blue-600 text-white hover:bg-blue-700'}`}
+						onClick={handleSendEmail}>
 						{selectedNonprofits.length === 0 ? 'Select a nonprofit to send email' :
-						'Send email to selected nonprofits'}</button>
-			</div>
+							'Send email to selected nonprofits'}</button>
+				</div>
+			)}
 		</div>
 	);
 };

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getSentEmailLogs } from '../services/EmailService';
+import axios, { CancelToken, isCancel } from 'axios';
+import { handleAxiosError } from '../utils/errorHandler';
 
 interface EmailLog {
   recipient: string;
@@ -11,16 +13,25 @@ const EmailLogs: React.FC = () => {
   const [logs, setLogs] = useState<EmailLog[]>([]);
 
   useEffect(() => {
-    const fetchLogs = async () => {
+    const source = axios.CancelToken.source();
+    const fetchLogs = async (cancelToken: CancelToken) => {
       try {
-        const response = await getSentEmailLogs();
+        const response = await getSentEmailLogs({ cancelToken });
         setLogs(response);
       } catch (error) {
-        console.error('Failed to fetch email logs', error);
+        if (isCancel(error)) {
+          console.log('Request cancelled');
+        } else {
+          handleAxiosError('Failed to fetch email logs', error);
+        }
       }
     };
 
-    fetchLogs();
+    fetchLogs(source.token);
+
+    return () => {
+      source.cancel();
+    };
   }, []);
 
   return (
