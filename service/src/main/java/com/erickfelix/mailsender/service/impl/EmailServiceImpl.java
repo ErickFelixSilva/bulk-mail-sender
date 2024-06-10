@@ -3,6 +3,7 @@ package com.erickfelix.mailsender.service.impl;
 import com.erickfelix.mailsender.model.EmailLog;
 import com.erickfelix.mailsender.model.EmailTemplate;
 import com.erickfelix.mailsender.model.Nonprofit;
+import com.erickfelix.mailsender.repository.NonprofitRepository;
 import com.erickfelix.mailsender.service.EmailService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +16,12 @@ import java.util.List;
 public class EmailServiceImpl implements EmailService {
     private static final Logger logger = LoggerFactory.getLogger(EmailServiceImpl.class);
 
+    private final NonprofitRepository nonprofitRepository;
     private final List<EmailLog> emailLogs = new ArrayList<>();
+
+    public EmailServiceImpl(NonprofitRepository nonprofitRepository) {
+        this.nonprofitRepository = nonprofitRepository;
+    }
 
     private void sendEmail(Long nonprofitId, String recipient, String subject, String body) {
         logger.info("Email sent to: {}", recipient);
@@ -42,6 +48,8 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendBulkEmailWithTemplate(EmailTemplate emailTemplate, List<Nonprofit> nonprofits) {
         nonprofits.forEach(nonProfit -> sendEmailWithTemplate(emailTemplate, nonProfit));
+        var nonprofitIds = nonprofits.stream().map(Nonprofit::getId).toList();
+        nonprofitRepository.markAsRecentlySent(nonprofitIds);
     }
 
     @Override

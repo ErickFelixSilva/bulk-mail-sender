@@ -31,4 +31,6 @@ public class Nonprofit {
     @NotBlank(message = "Email is mandatory")
     @Column(unique = true)
     private String email;
+
+    private Boolean emailSent = false;
 }

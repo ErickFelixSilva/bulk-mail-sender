@@ -10,7 +10,7 @@ function NonprofitList(): JSX.Element {
 	const [nonprofits, setNonprofits] = useState<Nonprofit[]>([]);
 	const [selectedNonprofits, setSelectedNonprofits] = useState<number[]>([]);
 	const [editingNonprofit, setEditingNonprofit] = useState<Nonprofit | null>(null);
-	const [newNonprofit, setNewNonprofit] = useState<Nonprofit>({ name: '', email: '', address: '', recentlySent: false });
+	const [newNonprofit, setNewNonprofit] = useState<Nonprofit>({ name: '', email: '', address: '', emailSent: false });
 
 	useEffect(() => {
 		const source = axios.CancelToken.source();
@@ -41,7 +41,7 @@ function NonprofitList(): JSX.Element {
 				setEditingNonprofit(null);
 			} else {
 				await saveNonprofit(newNonprofit);
-				setNewNonprofit({ name: '', email: '', address: '', recentlySent: false });
+				setNewNonprofit({ name: '', email: '', address: '', emailSent: false });
 			}
 			fetchNonprofits();
 		} catch (error: any) {
@@ -144,13 +144,13 @@ function NonprofitList(): JSX.Element {
 						<th className="py-2 px-4 text-left">Name</th>
 						<th className="py-2 px-4 text-left">Email</th>
 						<th className="py-2 px-4 text-left">Address</th>
-						<th className="py-2 px-4 text-left">Recently Sent</th>
+						<th className="py-2 px-4 text-left">Email Sent</th>
 						<th className="py-2 px-4 text-left">Actions</th>
 					</tr>
 				</thead>
 				<tbody>
 					{nonprofits.map((nonprofit) => (
-						<tr key={nonprofit.id} className={`border-t ${nonprofit.recentlySent ? 'bg-green-100' : ''}`}>
+						<tr key={nonprofit.id} className={`border-t ${nonprofit.emailSent ? 'bg-green-100' : ''}`}>
 							<td className="py-2 px-4">
 								<input
 									type="checkbox"
@@ -162,7 +162,7 @@ function NonprofitList(): JSX.Element {
 							<td className="py-2 px-4">{nonprofit.email}</td>
 							<td className="py-2 px-4">{nonprofit.address}</td>
 							<td className="py-2 px-4">
-							{nonprofit.recentlySent ? (
+							{nonprofit.emailSent ? (
                 <FontAwesomeIcon icon={faCheckCircle} className="text-green-500" />
               ) : (
                 <FontAwesomeIcon icon={faTimesCircle} className="text-gray-500" />

@@ -3,7 +3,6 @@ package com.erickfelix.mailsender.controller;
 import com.erickfelix.mailsender.dto.NonprofitDto;
 import com.erickfelix.mailsender.dto.NonprofitMapper;
 import com.erickfelix.mailsender.model.Nonprofit;
-import com.erickfelix.mailsender.service.EmailService;
 import com.erickfelix.mailsender.service.NonprofitService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -24,44 +23,39 @@ import java.util.List;
 public class NonProfitController {
 
     private final NonprofitService nonProfitService;
-    private final EmailService emailService;
 
-    public NonProfitController(NonprofitService nonProfitService,
-                               EmailService emailService) {
+    public NonProfitController(NonprofitService nonProfitService) {
         this.nonProfitService = nonProfitService;
-        this.emailService = emailService;
     }
 
      @GetMapping
      public List<NonprofitDto> getAllNonProfits() {
          var nonprofits = nonProfitService.getAllNonprofits();
-         return nonprofits.stream()
-                 .map(nonprofit -> {
-                    var recentlySent = emailService.isRecentlySent(nonprofit.getId());
-                    return NonprofitMapper.toDto(nonprofit, recentlySent);
-                 }).toList();
+         return nonprofits.stream().map(NonprofitMapper::toDto).toList();
      }
 
      @GetMapping("/{id}")
      public NonprofitDto getNonProfitById(@PathVariable Long id) {
          var nonprofit = nonProfitService.getNonprofitById(id);
-         return NonprofitMapper.toDto(nonprofit, emailService.isRecentlySent(id));
+         return NonprofitMapper.toDto(nonprofit);
      }
 
      @PostMapping
-     public Nonprofit createNonProfit(@Valid @RequestBody Nonprofit nonProfit) {
-         return nonProfitService.createNonprofit(nonProfit);
-     }
+     public NonprofitDto createNonProfit(@Valid @RequestBody Nonprofit nonProfit) {
+         var nonprofit = nonProfitService.createNonprofit(nonProfit);
+         return NonprofitMapper.toDto(nonprofit);
+    }
 
      @PutMapping("/{id}")
-     public ResponseEntity<Nonprofit> updateNonProfit(@PathVariable Long id,@Valid @RequestBody Nonprofit nonProfit) {
+     public ResponseEntity<NonprofitDto> updateNonProfit(@PathVariable Long id,@Valid @RequestBody Nonprofit nonProfit) {
          boolean nonProfitExists = nonProfitService.nonprofitExists(id);
          Nonprofit updatedNonprofit = nonProfitService.updateNonprofit(id, nonProfit);
+         NonprofitDto nonprofitDto = NonprofitMapper.toDto(updatedNonprofit);
 
          if (nonProfitExists) {
-             return ResponseEntity.ok(updatedNonprofit);
+             return ResponseEntity.ok(nonprofitDto);
          } else {
-             return new ResponseEntity<>(updatedNonprofit, HttpStatus.CREATED);
+             return new ResponseEntity<>(nonprofitDto, HttpStatus.CREATED);
          }
      }
 
