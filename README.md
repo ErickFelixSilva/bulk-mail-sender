@@ -14,7 +14,6 @@ all the technologies involved, which are listed below. The application allows us
 - [Usage](#usage)
 - [Testing](#testing)
 - [API Endpoints](#api-endpoints)
-- [License](#license)
 
 ## Features
 
